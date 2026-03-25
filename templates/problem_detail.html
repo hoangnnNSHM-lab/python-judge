@@ -4,7 +4,6 @@
 {% block head %}
 <!-- CodeMirror CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
 {% endblock %}
 
 {% block content %}
@@ -122,7 +121,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
         mode: 'python',
-        theme: 'dracula',
+        theme: 'default',
         lineNumbers: true,
         matchBrackets: true,
         autoCloseBrackets: true,

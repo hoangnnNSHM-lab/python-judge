@@ -1,8 +1,24 @@
 """Problem definitions for the Python Lambda Judge."""
 
+MODULES = {
+    'lambda': {
+        'id': 'lambda',
+        'title': 'Hàm nâng cao (Lambda)',
+        'description': 'Các bài tập sử dụng lambda, map, filter và các hàm bậc cao trong Python.',
+        'icon': 'λ'
+    },
+    'basics': {
+        'id': 'basics',
+        'title': 'Python Cơ bản',
+        'description': 'Các bài tập nhập môn, biến, kiểu dữ liệu, vòng lặp và câu lệnh điều kiện.',
+        'icon': '🐍'
+    }
+}
+
 PROBLEMS = {
     1: {
         'id': 1,
+        'module_id': 'lambda',
         'title': 'Tính biểu thức tuyến tính',
         'difficulty': 'Cơ bản',
         'difficulty_color': '#4ade80',
@@ -16,6 +32,7 @@ PROBLEMS = {
     },
     2: {
         'id': 2,
+        'module_id': 'lambda',
         'title': 'Tính tổng bình phương số chẵn',
         'difficulty': 'Trung bình',
         'difficulty_color': '#facc15',
@@ -29,6 +46,7 @@ PROBLEMS = {
     },
     3: {
         'id': 3,
+        'module_id': 'lambda',
         'title': 'Tìm số có tổng chữ số lớn nhất',
         'difficulty': 'Trung bình',
         'difficulty_color': '#facc15',
@@ -42,6 +60,7 @@ PROBLEMS = {
     },
     4: {
         'id': 4,
+        'module_id': 'lambda',
         'title': 'Sắp xếp theo giá trị tuyệt đối',
         'difficulty': 'Khá',
         'difficulty_color': '#fb923c',
@@ -55,6 +74,7 @@ PROBLEMS = {
     },
     5: {
         'id': 5,
+        'module_id': 'lambda',
         'title': 'Không gian Oxy và Khoảng cách',
         'difficulty': 'Nâng cao',
         'difficulty_color': '#f87171',
@@ -68,6 +88,7 @@ PROBLEMS = {
     },
     6: {
         'id': 6,
+        'module_id': 'lambda',
         'title': 'Quy đổi nhiệt độ IoT',
         'difficulty': 'Cơ bản',
         'difficulty_color': '#4ade80',
@@ -81,6 +102,7 @@ PROBLEMS = {
     },
     7: {
         'id': 7,
+        'module_id': 'lambda',
         'title': 'Rút trích Tên miền Email',
         'difficulty': 'Trung bình',
         'difficulty_color': '#facc15',
@@ -94,6 +116,7 @@ PROBLEMS = {
     },
     8: {
         'id': 8,
+        'module_id': 'lambda',
         'title': 'Trích xuất Log Lỗi Máy chủ',
         'difficulty': 'Trung bình',
         'difficulty_color': '#facc15',
@@ -107,6 +130,7 @@ PROBLEMS = {
     },
     9: {
         'id': 9,
+        'module_id': 'lambda',
         'title': 'Xếp hạng Xét tuyển Đại học',
         'difficulty': 'Khá',
         'difficulty_color': '#fb923c',
@@ -123,6 +147,7 @@ PROBLEMS = {
     },
     10: {
         'id': 10,
+        'module_id': 'lambda',
         'title': 'Xử lý giỏ hàng Thương mại điện tử',
         'difficulty': 'Nâng cao',
         'difficulty_color': '#f87171',
@@ -133,5 +158,34 @@ PROBLEMS = {
         'example_input': 'SP1:200:2,SP2:100:0,SP3:250:3',
         'example_output': '1035',
         'explanation': 'SP2 bị loại (SL=0). Tổng: (200×2)+(250×3)=1150. Vì 1150 ≥ 1000, giảm 10% → 1150×0.9 = 1035.',
+    },
+
+    11: {
+        'id': 11,
+        'module_id': 'basics',
+        'title': 'Tính tổng hai số',
+        'difficulty': 'Cơ bản',
+        'difficulty_color': '#4ade80',
+        'category': 'Cơ bản',
+        'description': 'Viết chương trình nhập vào hai số nguyên A và B, in ra tổng của chúng.',
+        'input_desc': 'Một dòng chứa 2 số nguyên cách nhau một khoảng trắng.',
+        'output_desc': 'In ra tổng của hai số đó.',
+        'example_input': '3 5',
+        'example_output': '8',
+        'explanation': '3 + 5 = 8'
+    },
+    12: {
+        'id': 12,
+        'module_id': 'basics',
+        'title': 'Kiểm tra chẵn lẻ',
+        'difficulty': 'Cơ bản',
+        'difficulty_color': '#4ade80',
+        'category': 'Cơ bản',
+        'description': 'Cho một số nguyên n. In ra "YES" nếu n là số chẵn, ngược lại in ra "NO".',
+        'input_desc': 'Một số nguyên n duy nhất.',
+        'output_desc': '"YES" hoặc "NO"',
+        'example_input': '4',
+        'example_output': 'YES',
+        'explanation': '4 là số chẵn nên in YES.'
     },
 }

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Học phần{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>📚 Danh sách Học phần</h1>
+        <p class="page-desc">Chọn một học phần để bắt đầu học và luyện tập</p>
+    </div>
+
+    <div class="modules-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 2rem;">
+        {% for mod_id, mod in modules.items() %}
+        <div class="module-card glass-panel" style="padding: 24px; border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;" onclick="document.getElementById('link-{{ mod_id }}').click()">
+            <div class="module-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <div class="module-icon" style="font-size: 2.5rem; background: rgba(255,255,255,0.1); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">{{ mod.icon }}</div>
+                <div>
+                    <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0; color: #fff;">{{ mod.title }}</h2>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">{{ progress[mod_id].total }} bài tập</span>
+                </div>
+            </div>
+            
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px; min-height: 44px;">
+                {{ mod.description }}
+            </p>
+
+            <div class="module-progress" style="margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Tiến độ</span>
+                    <span style="color: #fff; font-weight: 500;">{{ progress[mod_id].solved }}/{{ progress[mod_id].total }} bài</span>
+                </div>
+                <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                    {% set pct = (progress[mod_id].solved / progress[mod_id].total * 100) if progress[mod_id].total > 0 else 0 %}
+                    <div class="progress-bar-fill" style="background: linear-gradient(90deg, #10b981, #34d399); height: 100%; width: {{ pct }}%; transition: width 0.5s;"></div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('problem_list', module_id=mod_id) }}" id="link-{{ mod_id }}" class="btn btn-primary btn-full" style="padding: 12px; font-weight: 500; text-align: center;">
+                {% if progress[mod_id].solved == 0 %}Bắt đầu học{% elif progress[mod_id].solved == progress[mod_id].total %}Hoàn thiện{% else %}Tiếp tục học{% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    background: rgba(255, 255, 255, 0.05); /* Slight highlight */
+}
+</style>
+{% endblock %}

@@ -9,7 +9,17 @@
     </div>
 
     <!-- Admin Actions -->
-    <div class="admin-actions">
+    <div class="admin-actions" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap;">
+        <form method="GET" action="{{ url_for('admin_dashboard') }}" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <label for="module_id" style="color: var(--text-muted); font-size: 0.95rem;">Học phần:</label>
+            <select name="module_id" id="module_id" style="width: auto; padding: 10px 14px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; cursor: pointer;" onchange="this.form.submit()">
+                <option value="">Tất cả học phần</option>
+                {% for mod_id, mod in modules.items() %}
+                <option value="{{ mod_id }}" {% if current_module == mod_id %}selected{% endif %}>{{ mod.title }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <div style="flex-grow: 1;"></div>
         <a href="{{ url_for('admin_create_account') }}" class="btn btn-primary" id="btn-create-account">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
             Tạo tài khoản mới

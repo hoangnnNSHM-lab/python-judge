@@ -6,11 +6,16 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Submission
-from problems import PROBLEMS
+from problems import PROBLEMS, MODULES
 from judge import judge_submission
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'python-judge-secret-key-2024'
+
+from dotenv import load_dotenv
+
+# Load secret variables from .env if present
+load_dotenv()
 
 # Use /tmp for Vercel (read-only filesystem), local instance/ folder otherwise
 IS_VERCEL = os.environ.get('VERCEL', False)
@@ -18,7 +23,17 @@ if IS_VERCEL:
     DB_PATH = '/tmp/judge.db'
 else:
     DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'judge.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
+
+# Setup Database URI
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # SQLAlchemy requires 'postgresql://' instead of 'postgres://'
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -46,7 +61,7 @@ def serve_css():
 @app.route('/')
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
     return redirect(url_for('login'))
 
 
@@ -55,7 +70,7 @@ def login():
     if current_user.is_authenticated:
         if current_user.is_admin:
             return redirect(url_for('admin_dashboard'))
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
@@ -65,7 +80,7 @@ def login():
             flash('Đăng nhập thành công!', 'success')
             if user.is_admin:
                 return redirect(url_for('admin_dashboard'))
-            return redirect(url_for('problem_list'))
+            return redirect(url_for('module_list'))
         else:
             flash('Tên đăng nhập hoặc mật khẩu không đúng.', 'error')
     return render_template('login.html')
@@ -74,7 +89,7 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         fullname = request.form.get('fullname', '').strip()
@@ -109,17 +124,44 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/problems')
+@app.route('/modules')
 @login_required
-def problem_list():
-    # Get best scores per problem for current user
+def module_list():
+    module_progress = {}
+    for mod_id, mod_data in MODULES.items():
+        problems_in_mod = [pid for pid, p in PROBLEMS.items() if p.get('module_id') == mod_id]
+        solved = 0
+        for pid in problems_in_mod:
+            best = Submission.query.filter_by(
+                user_id=current_user.id, problem_id=pid
+            ).order_by(Submission.score.desc()).first()
+            if best and best.score == 100:
+                solved += 1
+        module_progress[mod_id] = {
+            'solved': solved,
+            'total': len(problems_in_mod)
+        }
+    return render_template('modules.html', modules=MODULES, progress=module_progress)
+
+
+@app.route('/module/<module_id>')
+@login_required
+def problem_list(module_id):
+    if module_id not in MODULES:
+        flash('Học phần không tồn tại.', 'error')
+        return redirect(url_for('module_list'))
+        
+    module_data = MODULES[module_id]
+    module_problems = {k: v for k, v in PROBLEMS.items() if v.get('module_id') == module_id}
+    
+    # Get best scores per problem for current user in this module
     best_scores = {}
-    for pid in PROBLEMS:
+    for pid in module_problems:
         best = Submission.query.filter_by(
             user_id=current_user.id, problem_id=pid
         ).order_by(Submission.score.desc()).first()
         best_scores[pid] = best.score if best else None
-    return render_template('problems.html', problems=PROBLEMS, best_scores=best_scores)
+    return render_template('problems.html', module=module_data, problems=module_problems, best_scores=best_scores)
 
 
 @app.route('/problem/<int:pid>')
@@ -127,7 +169,7 @@ def problem_list():
 def problem_detail(pid):
     if pid not in PROBLEMS:
         flash('Bài tập không tồn tại.', 'error')
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
     problem = PROBLEMS[pid]
     # Get recent submissions
     submissions = Submission.query.filter_by(
@@ -141,7 +183,7 @@ def problem_detail(pid):
 def submit(pid):
     if pid not in PROBLEMS:
         flash('Bài tập không tồn tại.', 'error')
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
 
     code = request.form.get('code', '')
     if not code.strip():
@@ -172,7 +214,7 @@ def submission_result(sid):
     sub = Submission.query.get_or_404(sid)
     if sub.user_id != current_user.id:
         flash('Bạn không có quyền xem kết quả này.', 'error')
-        return redirect(url_for('problem_list'))
+        return redirect(url_for('module_list'))
     problem = PROBLEMS.get(sub.problem_id, {})
     details = json.loads(sub.details) if sub.details else []
     return render_template('results.html', submission=sub, problem=problem, details=details)
@@ -212,7 +254,7 @@ def admin_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_admin:
             flash('Bạn không có quyền truy cập trang này.', 'error')
-            return redirect(url_for('problem_list'))
+            return redirect(url_for('module_list'))
         return f(*args, **kwargs)
     return decorated
 
@@ -220,13 +262,22 @@ def admin_required(f):
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
+    # Optional module filter
+    module_id = request.args.get('module_id')
+    if module_id and module_id not in MODULES:
+        module_id = None
+        
+    filter_problems = PROBLEMS
+    if module_id:
+        filter_problems = {k: v for k, v in PROBLEMS.items() if v.get('module_id') == module_id}
+
     students = User.query.filter_by(is_admin=False).order_by(User.fullname).all()
     # Build score matrix
     student_data = []
     for s in students:
         scores = {}
         total = 0
-        for pid in PROBLEMS:
+        for pid in filter_problems:
             best = Submission.query.filter_by(
                 user_id=s.id, problem_id=pid
             ).order_by(Submission.score.desc()).first()
@@ -239,8 +290,9 @@ def admin_dashboard():
             'scores': scores,
             'total': total,
         })
+    # Sort students by total descending in this view
     student_data.sort(key=lambda x: -x['total'])
-    return render_template('admin_dashboard.html', student_data=student_data, problems=PROBLEMS)
+    return render_template('admin_dashboard.html', student_data=student_data, problems=filter_problems, modules=MODULES, current_module=module_id)
 
 
 @app.route('/admin/create-account', methods=['GET', 'POST'])
@@ -348,4 +400,4 @@ with app.app_context():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

@@ -19,13 +19,16 @@
         <a href="{{ url_for('problem_detail', pid=pid) }}" class="problem-card" id="problem-card-{{ pid }}">
             <div class="card-top">
                 <span class="problem-num">#{{ pid }}</span>
-                <span class="difficulty-badge" style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{ p.difficulty }}</span>
+                <span class="difficulty-badge"
+                    style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{
+                    p.difficulty }}</span>
             </div>
             <h3 class="problem-title">{{ p.title }}</h3>
             <div class="card-bottom">
                 {% if score is not none %}
                 <div class="score-bar">
-                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}" style="width: {{ score }}%"></div>
+                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}"
+                        style="width: {{ score }}%"></div>
                 </div>
                 <span class="score-text {% if score == 100 %}perfect{% endif %}">{{ score }}/100</span>
                 {% else %}
@@ -47,13 +50,16 @@
         <a href="{{ url_for('problem_detail', pid=pid) }}" class="problem-card" id="problem-card-{{ pid }}">
             <div class="card-top">
                 <span class="problem-num">#{{ pid }}</span>
-                <span class="difficulty-badge" style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{ p.difficulty }}</span>
+                <span class="difficulty-badge"
+                    style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{
+                    p.difficulty }}</span>
             </div>
             <h3 class="problem-title">{{ p.title }}</h3>
             <div class="card-bottom">
                 {% if score is not none %}
                 <div class="score-bar">
-                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}" style="width: {{ score }}%"></div>
+                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}"
+                        style="width: {{ score }}%"></div>
                 </div>
                 <span class="score-text {% if score == 100 %}perfect{% endif %}">{{ score }}/100</span>
                 {% else %}
