@@ -49,9 +49,9 @@
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    Upload CSV
+                    Upload Excel/CSV
                 </a>
-                {% else %}
+               {% else %}
                 <a href="{{ url_for('problem_list') }}"
                     class="nav-link {% if request.endpoint == 'problem_list' %}active{% endif %}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

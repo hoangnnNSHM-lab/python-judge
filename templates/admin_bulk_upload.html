@@ -7,24 +7,38 @@
         <div class="auth-header">
             <div class="auth-icon" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">📁</div>
             <h1>Upload tài khoản hàng loạt</h1>
-            <p class="auth-subtitle">Tạo nhiều tài khoản cùng lúc từ file CSV</p>
+            <p class="auth-subtitle">Tạo nhiều tài khoản cùng lúc từ file Excel hoặc CSV</p>
+        </div>
+
+        <div class="csv-guide" style="margin-bottom: 16px;">
+            <h3>📥 File mẫu Excel (khuyên dùng)</h3>
+            <p>Tải file mẫu, điền thông tin và upload lại:</p>
+            <a href="{{ url_for('admin_download_template') }}" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;margin:10px 0;font-size:0.95rem;padding:10px 20px;text-decoration:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Tải file mẫu (.xlsx)
+            </a>
         </div>
 
         <div class="csv-guide">
-            <h3>📋 Hướng dẫn định dạng CSV</h3>
-            <p>File CSV gồm 3 cột, mỗi dòng là một tài khoản:</p>
+            <h3>📋 Hướng dẫn định dạng</h3>
+            <p>File gồm 3 cột: <strong>username</strong>, <strong>Họ và tên</strong>, <strong>mật khẩu</strong>. Mỗi dòng là một tài khoản.</p>
             <pre class="csv-example">username,Họ và tên,mật khẩu
 student01,Nguyễn Văn A,123456
 student02,Trần Thị B,123456
 student03,Lê Văn C,abcdef</pre>
             <p class="csv-note">⚠️ Không cần dòng tiêu đề. Tài khoản đã tồn tại sẽ bị bỏ qua.</p>
+            <p class="csv-note" style="color: var(--text-muted); margin-top: 4px;">💡 Hỗ trợ: <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.txt</strong></p>
         </div>
 
         <form method="POST" enctype="multipart/form-data" class="auth-form">
             <div class="form-group">
-                <label for="csv_file">Chọn file CSV</label>
+                <label for="csv_file">Chọn file Excel hoặc CSV</label>
                 <div class="file-upload-wrapper">
-                    <input type="file" id="csv_file" name="csv_file" accept=".csv,.txt" required>
+                    <input type="file" id="csv_file" name="csv_file" accept=".xlsx,.xls,.csv,.txt" required>
                     <div class="file-upload-display" id="file-display">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.5">
@@ -34,7 +48,7 @@ student03,Lê Văn C,abcdef</pre>
                             <polyline points="9 15 12 12 15 15" />
                         </svg>
                         <span>Kéo thả file hoặc nhấn để chọn</span>
-                        <small>.csv hoặc .txt</small>
+                        <small>.xlsx, .xls, .csv hoặc .txt</small>
                     </div>
                 </div>
             </div>
