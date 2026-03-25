@@ -271,17 +271,37 @@ def admin_bulk_upload():
     if request.method == 'POST':
         file = request.files.get('csv_file')
         if not file or not file.filename:
-            flash('Vui lòng chọn file CSV.', 'error')
+            flash('Vui lòng chọn file.', 'error')
             return render_template('admin_bulk_upload.html')
 
+        filename = file.filename.lower()
+        rows = []
+
         try:
-            stream = io.StringIO(file.stream.read().decode('utf-8-sig'))
-            reader = csv.reader(stream)
+            if filename.endswith('.xlsx') or filename.endswith('.xls'):
+                # Parse XLSX
+                import openpyxl
+                wb = openpyxl.load_workbook(file, read_only=True)
+                ws = wb.active
+                for row in ws.iter_rows(min_row=1, values_only=True):
+                    if row and any(row):
+                        rows.append([str(cell).strip() if cell else '' for cell in row])
+                wb.close()
+            else:
+                # Parse CSV
+                stream = io.StringIO(file.stream.read().decode('utf-8-sig'))
+                reader = csv.reader(stream)
+                rows = [row for row in reader if row]
+
+            # Skip header row if it looks like a header
+            if rows and rows[0][0].lower() in ('username', 'tên đăng nhập', 'user'):
+                rows = rows[1:]
+
             created = 0
             skipped = 0
             errors = []
-            for row_num, row in enumerate(reader, 1):
-                if not row or len(row) < 3:
+            for row_num, row in enumerate(rows, 1):
+                if len(row) < 3:
                     errors.append(f'Dòng {row_num}: thiếu dữ liệu')
                     continue
                 username = row[0].strip()
@@ -306,6 +326,15 @@ def admin_bulk_upload():
         except Exception as e:
             flash(f'Lỗi đọc file: {str(e)}', 'error')
     return render_template('admin_bulk_upload.html')
+
+
+@app.route('/admin/download-template')
+@admin_required
+def admin_download_template():
+    """Download the sample XLSX template for bulk account creation."""
+    from flask import send_file
+    template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'mau_tai_khoan.xlsx')
+    return send_file(template_path, as_attachment=True, download_name='mau_tai_khoan.xlsx')
 
 
 with app.app_context():

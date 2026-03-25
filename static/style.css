@@ -461,6 +461,26 @@ a:hover { color: var(--accent); }
     border-color: var(--accent); background: rgba(139,92,246,0.05);
 }
 .file-upload-display small { font-size: 0.75rem; }
+.btn-download {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; margin-top: 0.75rem;
+    background: rgba(74, 222, 128, 0.1); color: var(--success);
+    border: 1px solid rgba(74, 222, 128, 0.2); border-radius: var(--radius-sm);
+    font-size: 0.85rem; font-weight: 600; transition: var(--transition);
+}
+.btn-download:hover { background: rgba(74, 222, 128, 0.2); color: var(--success); transform: translateY(-1px); }
+.format-table {
+    width: 100%; border-collapse: collapse; margin: 0.5rem 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+}
+.format-table th {
+    background: rgba(139, 92, 246, 0.15); color: var(--accent-light);
+    padding: 6px 12px; text-align: left; font-weight: 600;
+}
+.format-table td {
+    padding: 6px 12px; color: var(--success);
+    border-bottom: 1px solid var(--border-glass);
+}
 
 /* ===== FOOTER ===== */
 .footer {
