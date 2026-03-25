@@ -33,6 +33,16 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+@app.route('/css')
+def serve_css():
+    """Serve CSS explicitly for Vercel compatibility."""
+    from flask import Response
+    css_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'style.css')
+    with open(css_path, 'r') as f:
+        css = f.read()
+    return Response(css, mimetype='text/css')
+
+
 @app.route('/')
 def index():
     if current_user.is_authenticated:
