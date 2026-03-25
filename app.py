@@ -11,7 +11,14 @@ from judge import judge_submission
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'python-judge-secret-key-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///judge.db'
+
+# Use /tmp for Vercel (read-only filesystem), local instance/ folder otherwise
+IS_VERCEL = os.environ.get('VERCEL', False)
+if IS_VERCEL:
+    DB_PATH = '/tmp/judge.db'
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'judge.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
