@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Bảng xếp hạng{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>🏆 Bảng Xếp Hạng</h1>
+        <p class="page-desc">Tổng điểm tốt nhất của tất cả {{ total_problems }} bài tập</p>
+    </div>
+
+    <div class="scoreboard glass-panel">
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th class="col-rank">Hạng</th>
+                    <th class="col-name">Họ và tên</th>
+                    <th class="col-user">Username</th>
+                    <th class="col-solved">Đã giải</th>
+                    <th class="col-score">Tổng điểm</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in board %}
+                <tr class="{% if loop.index <= 3 %}top-rank rank-{{ loop.index }}{% endif %} {% if entry.username == current_user.username %}current-user{% endif %}">
+                    <td class="col-rank">
+                        {% if loop.index == 1 %}
+                        <span class="rank-medal gold">🥇</span>
+                        {% elif loop.index == 2 %}
+                        <span class="rank-medal silver">🥈</span>
+                        {% elif loop.index == 3 %}
+                        <span class="rank-medal bronze">🥉</span>
+                        {% else %}
+                        <span class="rank-num">{{ loop.index }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="col-name">
+                        <span class="user-avatar-sm">{{ entry.fullname[0] }}</span>
+                        {{ entry.fullname }}
+                    </td>
+                    <td class="col-user">@{{ entry.username }}</td>
+                    <td class="col-solved">
+                        <span class="solved-badge">{{ entry.solved }}/{{ total_problems }}</span>
+                    </td>
+                    <td class="col-score">
+                        <span class="total-score">{{ entry.total_score }}</span>
+                        <span class="max-score">/ {{ total_problems * 100 }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not board %}
+                <tr><td colspan="5" class="empty-state">Chưa có học sinh nào nộp bài.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

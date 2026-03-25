@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Danh sách Bài tập{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Phiếu Bài Tập Lập Trình Python</h1>
+        <p class="page-desc">Chuyên đề: Làm chủ Lambda Functions & Hàm bậc cao · 10 bài · Mỗi bài 100 điểm</p>
+    </div>
+
+    <div class="section-title">
+        <span class="section-badge math">📐</span>
+        <h2>Phần 1: Bài toán Toán học</h2>
+    </div>
+    <div class="problem-grid">
+        {% for pid in [1,2,3,4,5] %}
+        {% set p = problems[pid] %}
+        {% set score = best_scores[pid] %}
+        <a href="{{ url_for('problem_detail', pid=pid) }}" class="problem-card" id="problem-card-{{ pid }}">
+            <div class="card-top">
+                <span class="problem-num">#{{ pid }}</span>
+                <span class="difficulty-badge" style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{ p.difficulty }}</span>
+            </div>
+            <h3 class="problem-title">{{ p.title }}</h3>
+            <div class="card-bottom">
+                {% if score is not none %}
+                <div class="score-bar">
+                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}" style="width: {{ score }}%"></div>
+                </div>
+                <span class="score-text {% if score == 100 %}perfect{% endif %}">{{ score }}/100</span>
+                {% else %}
+                <span class="not-attempted">Chưa làm</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="section-title">
+        <span class="section-badge real">💼</span>
+        <h2>Phần 2: Bài toán Thực tế</h2>
+    </div>
+    <div class="problem-grid">
+        {% for pid in [6,7,8,9,10] %}
+        {% set p = problems[pid] %}
+        {% set score = best_scores[pid] %}
+        <a href="{{ url_for('problem_detail', pid=pid) }}" class="problem-card" id="problem-card-{{ pid }}">
+            <div class="card-top">
+                <span class="problem-num">#{{ pid }}</span>
+                <span class="difficulty-badge" style="background: {{ p.difficulty_color }}20; color: {{ p.difficulty_color }}; border: 1px solid {{ p.difficulty_color }}40">{{ p.difficulty }}</span>
+            </div>
+            <h3 class="problem-title">{{ p.title }}</h3>
+            <div class="card-bottom">
+                {% if score is not none %}
+                <div class="score-bar">
+                    <div class="score-fill {% if score == 100 %}perfect{% elif score >= 50 %}partial{% else %}low{% endif %}" style="width: {{ score }}%"></div>
+                </div>
+                <span class="score-text {% if score == 100 %}perfect{% endif %}">{{ score }}/100</span>
+                {% else %}
+                <span class="not-attempted">Chưa làm</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

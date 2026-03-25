@@ -1,0 +1,4 @@
+3
+[INFO] User logged in
+[ERROR] Database timeout
+[WARN] High memory

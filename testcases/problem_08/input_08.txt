@@ -1,0 +1,5 @@
+4
+[ERROR] Null pointer
+[ERROR] Stack overflow
+[INFO] Recovered
+[ERROR] Timeout

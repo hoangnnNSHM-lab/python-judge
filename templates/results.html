@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Kết quả Bài {{ problem.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="result-page">
+        <!-- Score Header -->
+        <div class="result-header glass-panel">
+            <div class="result-top">
+                <a href="{{ url_for('problem_detail', pid=submission.problem_id) }}" class="back-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Quay lại bài {{ problem.id }}
+                </a>
+                <span class="submit-time">{{ submission.submitted_at.strftime('%H:%M:%S - %d/%m/%Y') }}</span>
+            </div>
+
+            <div class="score-display">
+                <div class="score-circle {% if submission.score == submission.total %}perfect{% elif submission.score >= 50 %}partial{% else %}low{% endif %}">
+                    <span class="score-num">{{ submission.score }}</span>
+                    <span class="score-sep">/</span>
+                    <span class="score-den">{{ submission.total }}</span>
+                </div>
+                <div class="score-info">
+                    <h2>{{ problem.title }}</h2>
+                    <p>
+                        {% if submission.score == submission.total %}
+                            🎉 Xuất sắc! Bạn đã hoàn thành bài tập!
+                        {% elif submission.score >= 70 %}
+                            👍 Tốt lắm! Hãy thử sửa thêm nhé!
+                        {% elif submission.score >= 30 %}
+                            💪 Cố gắng thêm, bạn gần đúng rồi!
+                        {% else %}
+                            📚 Hãy xem lại đề bài và thử lại nhé!
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-results glass-panel">
+            <h3>📋 Chi tiết kết quả từng Test</h3>
+            <div class="tests-grid">
+                {% for d in details %}
+                <div class="test-item {{ 'passed' if d.passed else 'failed' }}">
+                    <div class="test-header">
+                        <span class="test-num">Test {{ d.test }}</span>
+                        <span class="test-status {% if d.status == 'AC' %}ac{% elif d.status == 'WA' %}wa{% elif d.status == 'TLE' %}tle{% else %}re{% endif %}">
+                            {% if d.status == 'AC' %}✅ AC{% elif d.status == 'WA' %}❌ WA{% elif d.status == 'TLE' %}⏱ TLE{% else %}💥 RE{% endif %}
+                        </span>
+                        <span class="test-points">{{ d.points }} điểm</span>
+                    </div>
+                    {% if not d.passed %}
+                    <div class="test-detail">
+                        <div class="test-row">
+                            <span class="test-label">Kỳ vọng:</span>
+                            <code class="test-value">{{ d.expected }}</code>
+                        </div>
+                        <div class="test-row">
+                            <span class="test-label">Kết quả:</span>
+                            <code class="test-value wrong">{{ d.actual }}</code>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Code Review -->
+        <div class="code-review glass-panel">
+            <h3>📝 Code đã nộp</h3>
+            <pre class="code-block"><code>{{ submission.code }}</code></pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

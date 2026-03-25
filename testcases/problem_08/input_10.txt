@@ -1,0 +1,6 @@
+5
+[DEBUG] Trace
+[INFO] Start
+[WARN] Deprecated
+[ERROR] Fatal error 500
+[INFO] Shutdown

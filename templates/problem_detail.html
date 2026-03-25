@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }}{% endblock %}
+
+{% block head %}
+<!-- CodeMirror CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container problem-page">
+    <div class="problem-layout">
+        <!-- Left: Problem Description -->
+        <div class="problem-desc-panel">
+            <div class="panel glass-panel">
+                <div class="panel-header">
+                    <div class="problem-meta">
+                        <span class="problem-num-lg">#{{ problem.id }}</span>
+                        <span class="difficulty-badge" style="background: {{ problem.difficulty_color }}20; color: {{ problem.difficulty_color }}; border: 1px solid {{ problem.difficulty_color }}40">{{ problem.difficulty }}</span>
+                        <span class="category-badge">{{ problem.category }}</span>
+                    </div>
+                    <h1 class="problem-title-lg">{{ problem.title }}</h1>
+                </div>
+
+                <div class="problem-body">
+                    <div class="desc-section">
+                        <h3>📝 Mô tả</h3>
+                        <p>{{ problem.description|safe }}</p>
+                    </div>
+
+                    <div class="desc-section">
+                        <h3>📥 Dữ liệu vào (Input)</h3>
+                        <p>{{ problem.input_desc }}</p>
+                    </div>
+
+                    <div class="desc-section">
+                        <h3>📤 Dữ liệu ra (Output)</h3>
+                        <p>{{ problem.output_desc }}</p>
+                    </div>
+
+                    <div class="desc-section">
+                        <h3>💡 Ví dụ</h3>
+                        <div class="example-box">
+                            <div class="example-col">
+                                <span class="example-label">Input</span>
+                                <pre class="example-pre">{{ problem.example_input }}</pre>
+                            </div>
+                            <div class="example-col">
+                                <span class="example-label">Output</span>
+                                <pre class="example-pre">{{ problem.example_output }}</pre>
+                            </div>
+                        </div>
+                        {% if problem.explanation %}
+                        <p class="explanation"><strong>Giải thích:</strong> {{ problem.explanation }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submission History -->
+                {% if submissions %}
+                <div class="submissions-history">
+                    <h3>📊 Lịch sử nộp bài</h3>
+                    <div class="history-list">
+                        {% for sub in submissions %}
+                        <a href="{{ url_for('submission_result', sid=sub.id) }}" class="history-item">
+                            <span class="history-score {% if sub.score == 100 %}perfect{% elif sub.score >= 50 %}partial{% else %}low{% endif %}">{{ sub.score }}/{{ sub.total }}</span>
+                            <span class="history-time">{{ sub.submitted_at.strftime('%H:%M %d/%m') }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Code Editor -->
+        <div class="editor-panel">
+            <div class="panel glass-panel">
+                <div class="panel-header editor-header">
+                    <h2>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        Code Editor
+                    </h2>
+                    <span class="lang-badge">Python 3</span>
+                </div>
+                <form method="POST" action="{{ url_for('submit', pid=problem.id) }}" id="submit-form">
+                    <div class="editor-wrapper">
+                        <textarea id="code-editor" name="code"># Viết code Python của bạn ở đây
+# Bài {{ problem.id }}: {{ problem.title }}
+
+</textarea>
+                    </div>
+                    <div class="editor-footer">
+                        <div class="editor-info">
+                            <span class="info-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                Thời gian: 5s
+                            </span>
+                            <span class="info-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                10 test × 10 điểm
+                            </span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Nộp bài
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+        mode: 'python',
+        theme: 'dracula',
+        lineNumbers: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        indentUnit: 4,
+        tabSize: 4,
+        indentWithTabs: false,
+        lineWrapping: true,
+        extraKeys: {
+            "Tab": function(cm) {
+                cm.replaceSelection("    ", "end");
+            }
+        }
+    });
+    editor.setSize('100%', '100%');
+
+    // Loading state on submit
+    document.getElementById('submit-form').addEventListener('submit', function() {
+        var btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Đang chấm bài...';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,3 @@
+[ERROR] Disk full
+[ERROR] Network down
+[ERROR] Auth failed

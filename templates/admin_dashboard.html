@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Admin - Bảng điểm{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>🛡️ Trang Quản trị</h1>
+        <p class="page-desc">Quản lý tài khoản học sinh và theo dõi điểm số</p>
+    </div>
+
+    <!-- Admin Actions -->
+    <div class="admin-actions">
+        <a href="{{ url_for('admin_create_account') }}" class="btn btn-primary" id="btn-create-account">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Tạo tài khoản mới
+        </a>
+        <a href="{{ url_for('admin_bulk_upload') }}" class="btn btn-secondary" id="btn-bulk-upload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload hàng loạt (CSV)
+        </a>
+    </div>
+
+    <!-- Score Matrix -->
+    <div class="scoreboard glass-panel">
+        <div class="table-header">
+            <h3>📊 Bảng điểm chi tiết - {{ student_data|length }} học sinh</h3>
+        </div>
+        <div class="table-scroll">
+            <table class="score-table admin-table">
+                <thead>
+                    <tr>
+                        <th class="col-rank sticky-col">#</th>
+                        <th class="col-name sticky-col-2">Họ và tên</th>
+                        <th class="col-user">Username</th>
+                        {% for pid in problems %}
+                        <th class="col-problem">B{{ pid }}</th>
+                        {% endfor %}
+                        <th class="col-total">Tổng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in student_data %}
+                    <tr>
+                        <td class="col-rank sticky-col">{{ loop.index }}</td>
+                        <td class="col-name sticky-col-2">
+                            <span class="user-avatar-sm">{{ entry.user.fullname[0] }}</span>
+                            {{ entry.user.fullname }}
+                        </td>
+                        <td class="col-user">@{{ entry.user.username }}</td>
+                        {% for pid in problems %}
+                        <td class="col-problem">
+                            {% if entry.scores[pid] is not none %}
+                            <span class="cell-score {% if entry.scores[pid] == 100 %}perfect{% elif entry.scores[pid] >= 50 %}partial{% else %}low{% endif %}">
+                                {{ entry.scores[pid] }}
+                            </span>
+                            {% else %}
+                            <span class="cell-empty">—</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="col-total">
+                            <span class="total-score">{{ entry.total }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not student_data %}
+                    <tr><td colspan="{{ problems|length + 3 }}" class="empty-state">Chưa có học sinh nào.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

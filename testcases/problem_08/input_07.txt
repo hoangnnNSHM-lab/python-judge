@@ -1,0 +1,5 @@
+4
+[WARN] W1
+[WARN] W2
+[ERROR] Connection reset
+[INFO] Done

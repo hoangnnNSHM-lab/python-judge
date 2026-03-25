@@ -1,0 +1,7 @@
+6
+[INFO] Boot
+[WARN] Low disk
+[ERROR] Crash
+[INFO] Restart
+[WARN] Slow query
+[ERROR] OOM

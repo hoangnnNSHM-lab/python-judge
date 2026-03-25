@@ -1,0 +1,6 @@
+5
+[ERROR] E1
+[INFO] I1
+[ERROR] E2
+[WARN] W1
+[ERROR] E3
