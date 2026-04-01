@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Admin - Bảng điểm tổng hợp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-back" title="Quay lại">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <h1 style="margin: 0;">📊 Bảng điểm tổng hợp</h1>
+        </div>
+        <p class="page-desc">{{ student_data|length }} học sinh · {{ problems|length }} bài tập</p>
+    </div>
+
+    <!-- Controls -->
+    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap;">
+        <form method="GET" action="{{ url_for('admin_scoreboard') }}" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <label style="color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;">Học phần:</label>
+            <select name="module_id" class="admin-select" onchange="this.form.submit()">
+                <option value="">Tất cả học phần</option>
+                {% for mod_id, mod in modules.items() %}
+                <option value="{{ mod_id }}" {% if current_module == mod_id %}selected{% endif %}>{{ mod.title }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Score Matrix -->
+    <div class="scoreboard glass-panel">
+        <div class="table-header">
+            <h3>Bảng điểm chi tiết · {{ student_data|length }} học sinh · {{ problems|length }} bài</h3>
+        </div>
+        <div class="table-scroll">
+            <table class="score-table admin-table">
+                <thead>
+                    <tr>
+                        <th class="col-rank sticky-col">#</th>
+                        <th class="col-name sticky-col-2">Họ và tên</th>
+                        <th class="col-user">Username</th>
+                        {% for pid, p in problems.items() %}
+                        <th class="col-problem" title="{{ p.title }}">B{{ loop.index }}</th>
+                        {% endfor %}
+                        <th class="col-total">Tổng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in student_data %}
+                    <tr>
+                        <td class="col-rank sticky-col">{{ loop.index }}</td>
+                        <td class="col-name sticky-col-2">
+                            <span class="user-avatar-sm">{{ entry.user.fullname[0] }}</span>
+                            {{ entry.user.fullname }}
+                        </td>
+                        <td class="col-user">@{{ entry.user.username }}</td>
+                        {% for pid in problems %}
+                        <td class="col-problem">
+                            {% if entry.scores[pid] is not none %}
+                            <span class="cell-score {% if entry.scores[pid] == 100 %}perfect{% elif entry.scores[pid] >= 50 %}partial{% else %}low{% endif %}">
+                                {{ entry.scores[pid] }}
+                            </span>
+                            {% else %}
+                            <span class="cell-empty">—</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="col-total">
+                            <span class="total-score">{{ entry.total }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not student_data %}
+                    <tr><td colspan="{{ problems|length + 3 }}" class="empty-state">Chưa có học sinh nào.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

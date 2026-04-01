@@ -352,6 +352,44 @@ def admin_problem_detail(pid):
                            total_students=len(students))
 
 
+@app.route('/admin/scoreboard')
+@admin_required
+def admin_scoreboard():
+    # Optional module filter
+    module_id = request.args.get('module_id')
+    if module_id and module_id not in MODULES:
+        module_id = None
+
+    filter_problems = PROBLEMS
+    if module_id:
+        filter_problems = {k: v for k, v in PROBLEMS.items() if v.get('module_id') == module_id}
+
+    students = User.query.filter_by(is_admin=False).order_by(User.fullname).all()
+    student_data = []
+    for s in students:
+        scores = {}
+        total = 0
+        for pid in filter_problems:
+            best = Submission.query.filter_by(
+                user_id=s.id, problem_id=pid
+            ).order_by(Submission.score.desc()).first()
+            sc = best.score if best else None
+            scores[pid] = sc
+            if sc:
+                total += sc
+        student_data.append({
+            'user': s,
+            'scores': scores,
+            'total': total,
+        })
+    student_data.sort(key=lambda x: -x['total'])
+    return render_template('admin_scoreboard.html',
+                           student_data=student_data,
+                           problems=filter_problems,
+                           modules=MODULES,
+                           current_module=module_id)
+
+
 @app.route('/admin/create-account', methods=['GET', 'POST'])
 @admin_required
 def admin_create_account():
