@@ -258,7 +258,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
@@ -271,28 +270,86 @@ def admin_dashboard():
     if module_id:
         filter_problems = {k: v for k, v in PROBLEMS.items() if v.get('module_id') == module_id}
 
-    students = User.query.filter_by(is_admin=False).order_by(User.fullname).all()
-    # Build score matrix
-    student_data = []
-    for s in students:
-        scores = {}
-        total = 0
-        for pid in filter_problems:
+    students = User.query.filter_by(is_admin=False).all()
+    total_students = len(students)
+
+    # Build per-problem stats
+    problem_stats = {}
+    for pid, pdata in filter_problems.items():
+        submitted = 0
+        perfect = 0
+        total_score = 0
+        for s in students:
             best = Submission.query.filter_by(
                 user_id=s.id, problem_id=pid
             ).order_by(Submission.score.desc()).first()
-            sc = best.score if best else None
-            scores[pid] = sc
-            if sc:
-                total += sc
+            if best:
+                submitted += 1
+                total_score += best.score
+                if best.score == 100:
+                    perfect += 1
+        avg_score = round(total_score / submitted, 1) if submitted > 0 else 0
+        problem_stats[pid] = {
+            'problem': pdata,
+            'submitted': submitted,
+            'total_students': total_students,
+            'perfect': perfect,
+            'avg_score': avg_score,
+            'pass_rate': round(perfect / total_students * 100) if total_students > 0 else 0,
+        }
+
+    return render_template('admin_dashboard.html',
+                           problem_stats=problem_stats,
+                           modules=MODULES,
+                           current_module=module_id,
+                           total_students=total_students)
+
+
+@app.route('/admin/problem/<int:pid>')
+@admin_required
+def admin_problem_detail(pid):
+    if pid not in PROBLEMS:
+        flash('Bài tập không tồn tại.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    problem = PROBLEMS[pid]
+    students = User.query.filter_by(is_admin=False).order_by(User.fullname).all()
+
+    student_data = []
+    for s in students:
+        best = Submission.query.filter_by(
+            user_id=s.id, problem_id=pid
+        ).order_by(Submission.score.desc()).first()
+        sub_count = Submission.query.filter_by(
+            user_id=s.id, problem_id=pid
+        ).count()
+        latest = Submission.query.filter_by(
+            user_id=s.id, problem_id=pid
+        ).order_by(Submission.submitted_at.desc()).first()
         student_data.append({
             'user': s,
-            'scores': scores,
-            'total': total,
+            'best_score': best.score if best else None,
+            'sub_count': sub_count,
+            'latest_at': latest.submitted_at if latest else None,
         })
-    # Sort students by total descending in this view
-    student_data.sort(key=lambda x: -x['total'])
-    return render_template('admin_dashboard.html', student_data=student_data, problems=filter_problems, modules=MODULES, current_module=module_id)
+
+    # Sort by best score descending, then name ascending
+    student_data.sort(key=lambda x: (-(x['best_score'] or 0), x['user'].fullname))
+
+    # Summary stats
+    submitted = sum(1 for d in student_data if d['best_score'] is not None)
+    perfect = sum(1 for d in student_data if d['best_score'] == 100)
+    total_score = sum(d['best_score'] for d in student_data if d['best_score'] is not None)
+    avg_score = round(total_score / submitted, 1) if submitted > 0 else 0
+
+    return render_template('admin_problem_detail.html',
+                           problem=problem,
+                           pid=pid,
+                           student_data=student_data,
+                           submitted=submitted,
+                           perfect=perfect,
+                           avg_score=avg_score,
+                           total_students=len(students))
 
 
 @app.route('/admin/create-account', methods=['GET', 'POST'])

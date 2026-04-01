@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Admin - Bảng điểm{% endblock %}
+{% block title %}Admin - Tổng quan bài tập{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="page-header">
         <h1>🛡️ Trang Quản trị</h1>
-        <p class="page-desc">Quản lý tài khoản học sinh và theo dõi điểm số</p>
+        <p class="page-desc">Tổng quan bài tập và theo dõi điểm số · {{ total_students }} học sinh</p>
     </div>
 
     <!-- Admin Actions -->
     <div class="admin-actions" style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap;">
         <form method="GET" action="{{ url_for('admin_dashboard') }}" style="margin: 0; display: flex; align-items: center; gap: 8px;">
-            <label for="module_id" style="color: var(--text-muted); font-size: 0.95rem;">Học phần:</label>
-            <select name="module_id" id="module_id" style="width: auto; padding: 10px 14px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.95rem; cursor: pointer;" onchange="this.form.submit()">
+            <label for="module_id" style="color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;">Học phần:</label>
+            <select name="module_id" id="module_id" class="admin-select" onchange="this.form.submit()">
                 <option value="">Tất cả học phần</option>
                 {% for mod_id, mod in modules.items() %}
                 <option value="{{ mod_id }}" {% if current_module == mod_id %}selected{% endif %}>{{ mod.title }}</option>
@@ -30,55 +30,45 @@
         </a>
     </div>
 
-    <!-- Score Matrix -->
-    <div class="scoreboard glass-panel">
-        <div class="table-header">
-            <h3>📊 Bảng điểm chi tiết - {{ student_data|length }} học sinh</h3>
-        </div>
-        <div class="table-scroll">
-            <table class="score-table admin-table">
-                <thead>
-                    <tr>
-                        <th class="col-rank sticky-col">#</th>
-                        <th class="col-name sticky-col-2">Họ và tên</th>
-                        <th class="col-user">Username</th>
-                        {% for pid in problems %}
-                        <th class="col-problem">B{{ pid }}</th>
-                        {% endfor %}
-                        <th class="col-total">Tổng</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in student_data %}
-                    <tr>
-                        <td class="col-rank sticky-col">{{ loop.index }}</td>
-                        <td class="col-name sticky-col-2">
-                            <span class="user-avatar-sm">{{ entry.user.fullname[0] }}</span>
-                            {{ entry.user.fullname }}
-                        </td>
-                        <td class="col-user">@{{ entry.user.username }}</td>
-                        {% for pid in problems %}
-                        <td class="col-problem">
-                            {% if entry.scores[pid] is not none %}
-                            <span class="cell-score {% if entry.scores[pid] == 100 %}perfect{% elif entry.scores[pid] >= 50 %}partial{% else %}low{% endif %}">
-                                {{ entry.scores[pid] }}
-                            </span>
-                            {% else %}
-                            <span class="cell-empty">—</span>
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                        <td class="col-total">
-                            <span class="total-score">{{ entry.total }}</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    {% if not student_data %}
-                    <tr><td colspan="{{ problems|length + 3 }}" class="empty-state">Chưa có học sinh nào.</td></tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+    <!-- Problem Overview Grid -->
+    <div class="admin-problem-grid">
+        {% for pid, stats in problem_stats.items() %}
+        <a href="{{ url_for('admin_problem_detail', pid=pid) }}" class="admin-problem-card" id="admin-card-{{ pid }}">
+            <div class="apc-header">
+                <div class="apc-title-row">
+                    <span class="apc-badge"
+                        style="background: {{ stats.problem.difficulty_color }}18; color: {{ stats.problem.difficulty_color }}; border: 1px solid {{ stats.problem.difficulty_color }}30">
+                        {{ stats.problem.difficulty }}
+                    </span>
+                </div>
+                <h3 class="apc-title">{{ stats.problem.title }}</h3>
+            </div>
+            <div class="apc-stats">
+                <div class="apc-stat">
+                    <span class="apc-stat-value">{{ stats.submitted }}/{{ stats.total_students }}</span>
+                    <span class="apc-stat-label">Đã nộp</span>
+                </div>
+                <div class="apc-stat">
+                    <span class="apc-stat-value">{{ stats.avg_score }}</span>
+                    <span class="apc-stat-label">Điểm TB</span>
+                </div>
+                <div class="apc-stat">
+                    <span class="apc-stat-value {% if stats.perfect > 0 %}apc-perfect{% endif %}">{{ stats.perfect }}</span>
+                    <span class="apc-stat-label">Đạt 100</span>
+                </div>
+            </div>
+            <div class="apc-progress-bar">
+                <div class="apc-progress-fill" style="width: {{ stats.pass_rate }}%"></div>
+            </div>
+            <span class="apc-progress-text">{{ stats.pass_rate }}% hoàn thành</span>
+        </a>
+        {% endfor %}
     </div>
+
+    {% if not problem_stats %}
+    <div class="empty-state-box">
+        <p>Không có bài tập nào trong học phần này.</p>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
